@@ -86,8 +86,9 @@ def plot_stock(stock_code):
     result_list = []
     trade_time = []
     for factor in outlier_factor_samples:
-        result_list.append(strategy(slice_ori, outlier_factor=factor)[0])
-        trade_time.append(strategy(slice_ori, outlier_factor=factor)[1])
+        result = strategy(slice_ori, day_length=day_length, outlier_factor=factor)
+        result_list.append(result[0])
+        trade_time.append(result[1])
     plt.figure(figsize=(10, 10))
     plt.plot(outlier_factor_samples, result_list)
     plt.savefig('%s_profit_%d.png' % (filename[:-4], day_length), dpi=300)
