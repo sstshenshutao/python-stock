@@ -15,7 +15,7 @@ def query_save(stock_code):
     stock_history = msft.history(period="max")
 
     newest_date = stock_history.tail(1).index.to_list()[0].strftime('%Y_%m_%d')
-    stock_history.to_csv('%s_%s.csv' % (stock_code, newest_date))
+    stock_history.to_csv('%s_%s.csv' % (stock_code, today))
 
 
 if __name__ == '__main__':
