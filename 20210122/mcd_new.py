@@ -10,7 +10,6 @@ from stock_query import query_save
 def strategy(df_ori, current_delta=0.2):
     out_money = 0
     stock_value = 0
-    max_stock_value = 0
     buy_sell_time = 0
     # 模拟策略60天 [60-1]
     day_offset = 60
@@ -28,24 +27,21 @@ def strategy(df_ori, current_delta=0.2):
             # 賣空
             out_money += today_price
             stock_value -= 1
-            # print("卖出: 在价格%f, %s, %f" % (today_price, today_date, current_upper_bound))
+            print("卖出: 在价格%f, %s, %f" % (today_price, today_date, current_upper_bound))
             buy_sell_time += 1
         elif today_price < current_lower_bound:
             # 買入
             out_money -= today_price
             stock_value += 1
-            # print("买入: 在价格%f, %s, %f" % (today_price, today_date, current_lower_bound))
+            print("买入: 在价格%f, %s, %f" % (today_price, today_date, current_lower_bound))
             buy_sell_time += 1
-        if abs(stock_value) > abs(max_stock_value):
-            max_stock_value = stock_value
         day_offset -= 1
     day_end_price = df_ori[whole_size - 1:whole_size]['Close'].to_list()[0]
     day_end_date = df_ori[whole_size - 1:whole_size].index.to_list()[0]
     print(
-        "收益: %f, 持仓: %d, 账户: %f, 结算日期: %s, 交易次数: %d, 最大持仓: %d" % (
-            stock_value * day_end_price + out_money, stock_value, out_money, day_end_date, buy_sell_time,
-            max_stock_value))
-    return stock_value * day_end_price + out_money, buy_sell_time, max_stock_value * day_end_price
+        "收益: %f, 持仓: %d, 账户: %f, 结算日期: %s, 交易次数: %d" % (
+            stock_value * day_end_price + out_money, stock_value, out_money, day_end_date, buy_sell_time))
+    return stock_value * day_end_price + out_money, buy_sell_time
 
 
 def cal_regression_mean(until_someday_df):
@@ -157,31 +153,16 @@ def prepare_data(df_all, analysis_domain=5):
 
 
 if __name__ == '__main__':
-    stocks = ['AAPL']
+    stocks = ['MCD', 'MSFT', 'AAPL', 'FB']
     for stock in stocks:
-        query_save(stock)
+        print(stock)
         # today = date.today().strftime('%Y_%m_%d')
         today = date.today().strftime('%Y_%m_%d')
+        query_save(stock)
         filename = '%s_%s.csv' % (stock, today)
         df = pd.read_csv(filename, index_col=0)
         delta_samples = np.linspace(0., 1., 11, endpoint=True)
         result_list = []
         trade_time = []
-        # 最大资金量比收益
-        ratios = []
-        for delta in delta_samples:
-            print(delta)
-            result = strategy(df, current_delta=delta)
-            result_list.append(result[0])
-            trade_time.append(result[1])
-            ratios.append(result[2] / result[0])
-            print(result[2], result[0], result[2] / result[0])
-        plt.figure(figsize=(10, 10))
-        plt.plot(delta_samples, result_list)
-        plt.savefig('%s_profit.png' % (filename[:-4]), dpi=300)
-        plt.figure(figsize=(10, 10))
-        plt.plot(delta_samples, trade_time)
-        plt.savefig('%s_profit_time.png' % (filename[:-4]), dpi=300)
-        plt.figure(figsize=(10, 10))
-        plt.plot(delta_samples, ratios)
-        plt.savefig('%s_profit_ratios.png' % (filename[:-4]), dpi=300)
+        current_upper_bound, current_lower_bound = regulated_bound(df, delta=0.4)
+        print("今天 %s \n 买入价: %f\n 卖出价: %f\n" % (today, current_lower_bound, current_upper_bound))
