@@ -22,13 +22,13 @@ def strategy(slice_ori, outlier_factor=1.2, day_length=7):
             # 賣空
             out_money += today_price
             stock_value -= 1
-            print("买入: 在价格%f, %s" % (today_price, today_date))
+            print("卖出: 在价格%f, %s" % (today_price, today_date))
             buy_sell_time += 1
         elif today_price < current_lower_bound['Close']:
             # 買入
             out_money -= today_price
             stock_value += 1
-            print("卖出: 在价格%f, %s" % (today_price, today_date))
+            print("买入: 在价格%f, %s" % (today_price, today_date))
             buy_sell_time += 1
         day_start += 1
         day_end = day_start + day_length

@@ -10,7 +10,9 @@ def nonlinear_approx(x_input, fx, L, e):
         x_input = x_input[:, np.newaxis]
     # choose L random elements of the data
     rng = np.random.default_rng()
-    x_l = rng.choice(x_input, L)
+    x_l = rng.choice(x_input, L - 3)
+    x_l = np.vstack([x_l, [x_input[-1], x_input[-2], x_input[-3]]])
+    # print(x_l)
     dij = cdist(x_input, x_l)
     # compute epsilon similar to diffusion maps
     epsilon = e * np.max(dij)
@@ -82,3 +84,4 @@ if __name__ == '__main__':
         plt.figure(figsize=(10, 10))
         plt.plot(center_param_plot_x, center_param_plot_y)
         plt.savefig('center_param_plot_%s.png' % (filename[:-4]), dpi=300)
+        pd.DataFrame(zip(center_param_plot_x, center_param_plot_y)).to_csv("mac.csv")
